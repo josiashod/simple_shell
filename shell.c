@@ -1,5 +1,6 @@
 #include "main.h"
 #include "errors.h"
+
 /**
  * main - Entry point
  *
@@ -25,7 +26,7 @@ int main(int argc  __attribute__((unused)), char *argv[])
 		if (buffer == NULL)
 			exit(0);
 
-		argv = string_to_array(buffer, "\n");
+		argv = string_to_array(buffer, " \n");
 		if (argv[0] == NULL)
 		{	free(argv);
 			continue;
