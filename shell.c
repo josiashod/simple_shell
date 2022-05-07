@@ -1,5 +1,6 @@
 #include "main.h"
 #include "fonctions.h"
+
 /**
  * main - Entry point
  *
@@ -15,6 +16,7 @@ int main(int argc  __attribute__((unused)), char *argv[])
 	pid_t child_pid;
 	int cmd_stat;
 	struct stat st;
+
 	while (1)
 	{
 		if (isatty(STDIN_FILENO))
@@ -49,6 +51,7 @@ int main(int argc  __attribute__((unused)), char *argv[])
 		}
 		free(argv);
 	}
+
 	printf("\n");
 	free(buffer);
 	return (0);
