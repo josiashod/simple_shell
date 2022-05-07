@@ -1,6 +1,5 @@
 #include "main.h"
-#include "fonctions.h"
-
+#include "errors.h"
 /**
  * main - Entry point
  *
