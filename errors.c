@@ -2,20 +2,37 @@
 
 /**
  * print_error - this function print error
- * @exec: the path of the executable
- * @command: the name of the command
- * @message: the message to print
+ * @shell_name: the name of the shell
+ * @command: the command is entered by the user
+ * @line: the line where the command is not good
+ * @mode: is interactive or non-interactive
+ * Description -
+ *				INTERACTIVE (1)
+ *				NON-INTERACTIVE (0)
  */
-void print_error(char *exec, char *command, char *message)
+void print_error(char *shell_name, char *command,
+int line __attribute__((unused)), int mode)
 {
-	char error[1024] = {0};
+	print(shell_name, STDERR_FILENO);
+	print(": ", STDERR_FILENO);
+	if (!mode)
+	{
+		/*print(line - '0', STDERR_FILENO);*/
+		print(" 1: ", STDERR_FILENO);
+	}
+	print(command, STDERR_FILENO);
+	print(": not found\n", STDERR_FILENO);
+}
 
-	_strcat(error, exec);
-	_strcat(error, ": 1: ");
-	_strcat(error, command);
-	_strcat(error, ": ");
-	_strcat(error, message);
-	_strcat(error, "\n");
-	write(STDOUT_FILENO, error, _strlen(error));
-	/*perror(error);*/
+/**
+ * print - print message
+ * @str: string to print
+ * @stream: stream to print out
+ */
+void print(char *str, int stream)
+{
+	int i = 0;
+
+	for (; str[i]; i++)
+		write(stream, &str[i], 1);
 }

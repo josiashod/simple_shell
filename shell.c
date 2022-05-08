@@ -1,77 +1,122 @@
 #include "main.h"
-#include "errors.h"
 
 /**
  * _getline - this function handle
  * line reading
  * @line: the address of the line
- * @stream: the file to read
+ * @mode: is interactive or non-interactive
+ * Description -
+ *				INTERACTIVE (1)
+ *				NON-INTERACTIVE (0)
  *
  * Return: on success the number of
  * caracteres read, on fails -1
  */
-ssize_t _getline(char **line, FILE *stream)
+ssize_t _getline(char **line, int mode)
 {
 	ssize_t ret;
 	size_t n = 0;
 
-	printf("($) ");
-	ret = getline(line, &n, stream);
+	if (mode)
+		printf("($) ");
+
+	ret = getline(line, &n, stdin);
 
 	return (ret);
 }
 
 /**
  * _execve - execute the command
- * @arg: the array of argument to execute
- *
- * Return: -1 on error
+ * @path: list of command directory
+ * @args: the array of argument to execute
+ * @command_type: the command_type
  */
-void _execve(char **arg)
+void _execve(list_t *path, char **args, int command_type)
 {
 	pid_t pid;
 	int status;
 
-	pid = fork();
-	if (pid == -1)
-		perror(SOMWTWRG);
-	if (pid == 0)
+	if (command_type == EXTERNAL_COMMAND || command_type == PATH_COMMAND)
 	{
-		if (execve(arg[0], arg, NULL) == -1)
+		pid = fork();
+		if (pid == 0)
 		{
-			perror(getenv("PWD"));
+			execute_command(path, args, command_type);
+		}
+		else
+			waitpid(pid, &status, 0);
+	}
+	else
+		execute_command(path, args, command_type);
+}
+
+/**
+ * execute_command - execute the command
+ * @path: list of command directory
+ * @args: the array of argument to execute
+ * @command_type: the command_type
+ */
+void execute_command(list_t *path, char **args, int command_type)
+{
+	void (*func)(list_t *path, char **args);
+
+	if (command_type == EXTERNAL_COMMAND)
+	{
+		if (execve(args[0], args, NULL) == -1)
+		{
+			perror(args[0]);
 			exit(2);
 		}
 	}
-	else
-		waitpid(pid, &status, 0);
+
+	if (command_type == PATH_COMMAND)
+	{
+		if (execve(_search(path, args[0]), args, NULL) == -1)
+		{
+			perror(args[0]);
+			exit(2);
+		}
+	}
+	if (command_type == INTERNAL_COMMAND)
+	{
+		printf("oui");
+		func = get_func(args[0]);
+		func(path, args);
+	}
 }
 
 /**
  * non_interactive - the function handle the
  * non-interactive mode off the shell
- * @args: list of argument
  * @path: list of command directory
+ * @shell_name: the name of the shell
  */
-void non_interactive(list_t *path __attribute__((unused)), char *exec_path __attribute__((unused)))
+void non_interactive(list_t *path, char *shell_name)
 {
-	char *line, delim = '\n', **args;
-	ssize_t i = 0;
+	char *line, delim = '\n', **lines, **args;
+	int i = 0, command_type;
 
-	while(_getline(&line, stdin) != -1)
+	while (_getline(&line, NON_INTERACTIVE_MODE) != -1)
 	{
 		/* remove new line */
 		strtok(line, &delim);
-		args = _split(line, ";");
+		lines = _split(line, ";");
 
-		for(i = 0; args[i]; i++)
+		for (i = 0; lines[i]; i++)
 		{
-			printf("%s\n", args[i]);
+			args = _split(lines[i], " ");
+			command_type = get_command_type(path, args[0]);
+
+			if (command_type == INVALID_COMMAND)
+				print_error(shell_name, args[0], i, NON_INTERACTIVE_MODE);
+
+			_execve(path, args, command_type);
+			free(args);
 		}
-		if (!args[i])
+		if (!lines[i])
 			break;
 	}
-	free(args);
+	free(lines);
 	free(line);
 }
 
@@ -80,36 +125,29 @@ void non_interactive(list_t *path __attribute__((unused)), char *exec_path __att
  * interactive - the function handle the
  * interactive mode off the shell
  * @path: list of command directory
- * @exec_path: the path of the executable 
+ * @shell_name: the name of the shell
  */
-void interactive(list_t *path, char *exec_path)
+void interactive(list_t *path, char *shell_name)
 {
-	char *cmd, *line, delim = '\n', **args;
+	char *line, delim = '\n', **args;
 	ssize_t read = 0;
+	int command_type;
 
 	while (1)
 	{
-		read = _getline(&line, stdin);
+		read = _getline(&line, INTERACTIVE_MODE);
 		if (read > 1)
 		{
-			cmd = strtok(line, &delim);
-			args = _split(cmd, " ");
+			/* remove new line */
+			strtok(line, &delim);
+			args = _split(line, " ");
 
-			if (_strchr(args[0], '/'))
-				_execve(args);
-			else
-			{
-				cmd = _search(path, args[0]);
-				if (!cmd)
-				{
-					perror(exec_path);
-				}
-				else
-				{
-					args[0] = cmd;
-					_execve(args);
-				}
-			}
+			command_type = get_command_type(path, args[0]);
+
+			if (command_type == INVALID_COMMAND)
+				print_error(shell_name, args[0], 0, INTERACTIVE_MODE);
+
+			_execve(path, args, command_type);
 			free(args);
 		}
 	}

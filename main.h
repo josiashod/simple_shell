@@ -19,6 +19,9 @@ extern char **environ;
 #define PATH_COMMAND 3
 #define INVALID_COMMAND -1
 
+#define INTERACTIVE_MODE 1
+#define NON_INTERACTIVE_MODE 0
+
 
 /**
  * struct list_s - singly linked list
@@ -38,13 +41,13 @@ typedef struct list_s
 /**
  * struct func - Struct func
  *
- * @func: The function to execute
- * @f: The function associated
+ * @command_name: The name of the command to handle
+ * @func: The function associated
  */
 typedef struct func
 {
 	char *command_name;
-	void (*func)();
+	void (*func)(list_t *path, char **args);
 } func_t;
 
 /* HELPERS */
@@ -59,18 +62,23 @@ list_t *add_node_end(list_t **head, char *str);
 void free_list(list_t *head);
 list_t *init_path(list_t **head);
 char *_search(list_t *path, char *str);
-void print_error(char *exec, char *command, char *message);
 
 /* BUILT-IN FUNCTIONS */
-void handle_exit(void);
-void env(void);
-void (*get_func(char *command))(void);
+void handle_exit(list_t *path, char **args);
+void env(list_t *path, char **args);
+void (*get_func(char *command))(list_t *path, char **args);
 
 
 /* SHELL FUNCTIONS */
-ssize_t _getline(char **line, FILE *stream);
-void _execve(char **arg);
-void interactive(list_t *path, char *exec_path);
-void non_interactive(list_t *path, char *exec_path);
+ssize_t _getline(char **line, int mode);
+void _execve(list_t *path, char **args, int command_type);
+void execute_command(list_t *path, char **args, int command_type);
+int get_command_type(list_t *path, char *command);
+void print(char *str, int stream);
+void print_error(char *shell_name, char *command, int line, int mode);
+
+/* SHELL MODE HANDLERS */
+void non_interactive(list_t *path, char *shell_name);
+void interactive(list_t *path, char *shell_name);
 
 #endif /* MAIN_H */

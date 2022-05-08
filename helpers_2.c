@@ -1,7 +1,7 @@
 #include "main.h"
 
 /**
- * command_type - determine the type of the command
+ * get_command_type - determine the type of the command
  * @path: list of command director
  * @command: the command to check
  *
@@ -12,7 +12,7 @@
  *              PATH_COMMAND (3) command found in path
  *              INVALID_COMMAND (-1) invalid command
  */
-int command_type(list_t *path, char *command)
+int get_command_type(list_t *path, char *command)
 {
 	int i;
 	char *internal_commands[] = {"env", "exit", NULL}, *dir;
@@ -41,7 +41,7 @@ int command_type(list_t *path, char *command)
  * Return: pointer to the function that corresponds
  * to the function tha should be executed
  */
-void (*get_func(char *command))(void)
+void (*get_func(char *command))(list_t *path, char **args)
 {
 	func_t funcs[] = {
 		{"env", env},
