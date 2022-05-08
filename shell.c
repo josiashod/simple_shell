@@ -14,8 +14,6 @@ int main(int argc  __attribute__((unused)), char *argv[])
 	size_t bufsize = 0;
 	int status;
 	pid_t child_pid;
-	int cmd_stat;
-	struct stat st;
 
 	while (1)
 	{
@@ -32,18 +30,22 @@ int main(int argc  __attribute__((unused)), char *argv[])
 			continue;
 		}
 
-		cmd_stat = stat(argv[0], &st);
-		if (cmd_stat == -1)
-			perror(INVALID_COMMAND);
-
 		child_pid = fork();
 		if (child_pid == -1)
 		{
 			write(STDOUT_FILENO, FORK_FAILED, strlen(FORK_FAILED));
 		}
-		else if (child_pid == 0)
+		if (child_pid == 0)
 		{
-			status = execve(argv[0], argv, NULL);
+			if (_strchr(argv[0], '/') == NULL)
+				argv[0] = handle_path(argv[0]);
+			if (execve(argv[0], argv, NULL))
+			{
+				perror(INVALID_COMMAND);
+				exit(EXIT_FAILURE);
+				break;
+			}
+			
 		}
 		else if (child_pid > 0)
 		{
