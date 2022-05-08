@@ -1,7 +1,7 @@
 #include "main.h"
 
 /**
- * print - print number
+ * print_number - print number
  * @n: number to print
  * @stream: stream to print out
  */

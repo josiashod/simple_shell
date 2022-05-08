@@ -48,7 +48,7 @@ void (*get_func(char *command))(list_t *path, char **args)
 		{"exit", handle_exit},
 		{NULL, NULL}
 	};
-	int i;
+	int i = 0;
 
 	while (i < 2)
 	{

@@ -1,24 +1,33 @@
 #include "main.h"
 
-void env(list_t *path __attribute__((unused)), char **args)
+/**
+ * env - print the environ
+ * @path: list of directory in path
+ * @args: list of arguments
+ */
+void env(list_t *path __attribute__((unused)),
+char **args __attribute__((unused)))
 {
-    char **env;
+	char **env;
 
-    printf("oui");
-    env = environ;
-    while (*env)
-    {
-        print(*env, STDOUT_FILENO);
-        env++;
-    }
-
-    free(args);
+	env = environ;
+	while (*env)
+	{
+		print(*env, STDOUT_FILENO);
+		print("\n", STDOUT_FILENO);
+		env++;
+	}
 }
 
+/**
+ * handle_exit - exit the shell
+ * @path: list of directory in path
+ * @args: list of arguments
+ */
 void handle_exit(list_t *path, char **args)
 {
-    free_list(path);
-    free(args);
+	free_list(path);
+	free(args);
 
-    exit(2);
+	exit(2);
 }

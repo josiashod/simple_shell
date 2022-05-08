@@ -46,7 +46,7 @@ void _execve(list_t *path, char **args, int command_type)
 		else
 			waitpid(pid, &status, 0);
 	}
-	else
+	else if (command_type == INTERNAL_COMMAND)
 		execute_command(path, args, command_type);
 }
 
@@ -79,7 +79,6 @@ void execute_command(list_t *path, char **args, int command_type)
 	}
 	if (command_type == INTERNAL_COMMAND)
 	{
-		printf("oui");
 		func = get_func(args[0]);
 		func(path, args);
 	}
@@ -93,18 +92,17 @@ void execute_command(list_t *path, char **args, int command_type)
  */
 void non_interactive(list_t *path, char *shell_name)
 {
-	char *line, delim = '\n', **lines, **args;
-	int i = 0, command_type;
+	char *cmd, *line, delim = '\n', **lines, **args;
+	int i = 1, command_type;
 
 	while (_getline(&line, NON_INTERACTIVE_MODE) != -1)
 	{
 		/* remove new line */
-		strtok(line, &delim);
-		lines = _split(line, ";");
-
-		for (i = 0; lines[i]; i++)
+		cmd = strtok(line, &delim);
+		while (cmd)
 		{
-			args = _split(lines[i], " ");
+			lines = _split(cmd, ";");
+			args = _split(lines[0], " ");
 			command_type = get_command_type(path, args[0]);
 
 			if (command_type == INVALID_COMMAND)
@@ -112,11 +110,11 @@ void non_interactive(list_t *path, char *shell_name)
 
 			_execve(path, args, command_type);
 			free(args);
+			free(lines);
+			i++;
+			cmd = strtok(NULL, &delim);
 		}
-		if (!lines[i])
-			break;
 	}
-	free(lines);
 	free(line);
 }
 
