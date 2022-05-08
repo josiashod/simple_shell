@@ -70,3 +70,26 @@ char *_strncat(char *dest, char *src, int n)
 	dest[len_dest + i] = '\0';
 	return (dest);
 }
+
+/**
+ * _strcmp - compare two string
+ * @s1: first string
+ * @s2: second string
+ * Return: 0 or other
+ */
+
+int _strcmp(char *s1, char *s2)
+{
+	int res, i = 0;
+
+	while (s1[i] == s2[i])
+	{
+		if (s1[i] == '\0' && s2[i] == '\0')
+		{
+			break;
+		}
+		i++;
+	}
+	res = s1[i] - s2[i];
+	return (res);
+}

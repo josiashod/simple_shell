@@ -14,6 +14,7 @@ int main(int argc  __attribute__((unused)), char *argv[])
 	size_t bufsize = 0;
 	int status;
 	pid_t child_pid;
+	int e;
 
 	while (1)
 	{
@@ -28,6 +29,19 @@ int main(int argc  __attribute__((unused)), char *argv[])
 		if (argv[0] == NULL)
 		{	free(argv);
 			continue;
+		}
+		if (_strcmp(argv[0], "env") == 0)
+		{
+			while (environ[e])
+				printf("%s\n", environ[e++]);
+			free(argv);
+			continue;
+		}
+		if (_strcmp(argv[0], "exit") == 0)
+		{
+			free(argv);
+			free(buffer);
+			exit(0);
 		}
 
 		child_pid = fork();

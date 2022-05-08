@@ -1,6 +1,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+extern char **environ;
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
@@ -17,4 +19,6 @@ char *_strncat(char *dest, char *src, int n);
 int string_length(char *p);
 char *_strcat(char *dest, char *src);
 char *_strchr(char *s, char c);
+int _strcmp(char *s1, char *s2);
+
 #endif
