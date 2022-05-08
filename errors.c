@@ -1,6 +1,20 @@
 #include "main.h"
 
 /**
+ * print - print number
+ * @n: number to print
+ * @stream: stream to print out
+ */
+void print_number(int n, int stream)
+{
+	char c = (n % 10) + '0';
+
+	if (n > 9)
+		print_number(n / 10, stream);
+	write(stream, &c, 1);
+}
+
+/**
  * print_error - this function print error
  * @shell_name: the name of the shell
  * @command: the command is entered by the user
@@ -17,8 +31,8 @@ int line __attribute__((unused)), int mode)
 	print(": ", STDERR_FILENO);
 	if (!mode)
 	{
-		/*print(line - '0', STDERR_FILENO);*/
-		print(" 1: ", STDERR_FILENO);
+		print_number(line, STDERR_FILENO);
+		print(": ", STDERR_FILENO);
 	}
 	print(command, STDERR_FILENO);
 	print(": not found\n", STDERR_FILENO);
