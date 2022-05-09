@@ -148,6 +148,9 @@ void interactive(list_t *path, char *shell_name)
 			_execve(path, args, command_type);
 			free(args);
 		}
+		
+		if (read == -1)
+			break;
 	}
 	free(line);
 }
