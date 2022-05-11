@@ -18,7 +18,7 @@ ssize_t _getline(char **line, int mode)
 	size_t n = 0;
 
 	if (mode)
-		printf("($) ");
+		print("($) ", STDOUT_FILENO);
 
 	ret = getline(line, &n, stdin);
 
