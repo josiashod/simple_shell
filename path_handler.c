@@ -70,7 +70,7 @@ list_t *init_path(list_t **head)
 	char  **path;
 	int i = 0;
 
-	path = _split(getenv("PATH"), ":");
+	path = _split(_getenv("PATH"), ":");
 	*head = add_node_end(head, "./");
 
 	while (path[i])

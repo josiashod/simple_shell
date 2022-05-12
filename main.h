@@ -56,6 +56,8 @@ char *_strcat(char *dest, char *src);
 char *_strchr(char *s, char c);
 int _strcmp(char *s1, char *s2);
 char **_split(char *str, char *delim);
+int _atoi(char *s);
+char *_getenv(const char *name);
 
 /* PATH HANDLER */
 list_t *add_node_end(list_t **head, char *str);
@@ -75,10 +77,11 @@ void _execve(list_t *path, char **args, int command_type);
 void execute_command(list_t *path, char **args, int command_type);
 int get_command_type(list_t *path, char *command);
 void print(char *str, int stream);
-void print_error(char *shell_name, char *command, int line, int mode);
+void print_number(int n, int stream);
+void print_error(char *command, int line, int mode);
 
 /* SHELL MODE HANDLERS */
-void non_interactive(list_t *path, char *shell_name);
-void interactive(list_t *path, char *shell_name);
+void non_interactive(list_t *path);
+void interactive(list_t *path);
 
 #endif /* MAIN_H */

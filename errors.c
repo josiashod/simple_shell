@@ -16,7 +16,6 @@ void print_number(int n, int stream)
 
 /**
  * print_error - this function print error
- * @shell_name: the name of the shell
  * @command: the command is entered by the user
  * @line: the line where the command is not good
  * @mode: is interactive or non-interactive
@@ -24,10 +23,10 @@ void print_number(int n, int stream)
  *				INTERACTIVE (1)
  *				NON-INTERACTIVE (0)
  */
-void print_error(char *shell_name, char *command,
-int line __attribute__((unused)), int mode)
+void print_error(char *command, int line __attribute__((unused)),
+int mode)
 {
-	print(shell_name, STDERR_FILENO);
+	print(_getenv("_"), STDERR_FILENO);
 	print(": ", STDERR_FILENO);
 	if (!mode)
 	{

@@ -88,9 +88,8 @@ void execute_command(list_t *path, char **args, int command_type)
  * non_interactive - the function handle the
  * non-interactive mode off the shell
  * @path: list of command directory
- * @shell_name: the name of the shell
  */
-void non_interactive(list_t *path, char *shell_name)
+void non_interactive(list_t *path)
 {
 	char *cmd, *line, delim = '\n', **lines, **args;
 	int i = 1, command_type;
@@ -106,7 +105,7 @@ void non_interactive(list_t *path, char *shell_name)
 			command_type = get_command_type(path, args[0]);
 
 			if (command_type == INVALID_COMMAND)
-				print_error(shell_name, args[0], i, NON_INTERACTIVE_MODE);
+				print_error(args[0], i, NON_INTERACTIVE_MODE);
 
 			_execve(path, args, command_type);
 			free(args);
@@ -123,9 +122,8 @@ void non_interactive(list_t *path, char *shell_name)
  * interactive - the function handle the
  * interactive mode off the shell
  * @path: list of command directory
- * @shell_name: the name of the shell
  */
-void interactive(list_t *path, char *shell_name)
+void interactive(list_t *path)
 {
 	char *line, delim = '\n', **args;
 	ssize_t read = 0;
@@ -143,12 +141,12 @@ void interactive(list_t *path, char *shell_name)
 			command_type = get_command_type(path, args[0]);
 
 			if (command_type == INVALID_COMMAND)
-				print_error(shell_name, args[0], 0, INTERACTIVE_MODE);
+				print_error(args[0], 0, INTERACTIVE_MODE);
 
 			_execve(path, args, command_type);
 			free(args);
 		}
-		
+
 		if (read == -1)
 			break;
 	}

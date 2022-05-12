@@ -59,3 +59,34 @@ void (*get_func(char *command))(list_t *path, char **args)
 
 	return (NULL);
 }
+
+/**
+ * _getenv - gets an environment variable.
+ * @name: name of the var
+ *
+ * Return: pointer to the variable
+ */
+char *_getenv(const char *name)
+{
+	int i, found;
+
+	while (*environ)
+	{
+		for (i = 0; *(*environ + i) != '='; i++)
+		{
+			found = 1;
+			if (*(name + i) != *(*environ + i))
+			{
+				found = 0;
+				break;
+			}
+		}
+		i++;
+		if (found)
+			return ((*environ + i));
+
+		environ++;
+	}
+
+	return (NULL);
+}
