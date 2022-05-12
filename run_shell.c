@@ -1,5 +1,15 @@
 #include "main.h"
 
+list_t *path = NULL;
+
+void ctrc_handler(int sig_num __attribute__((unused)))
+{
+    fflush(stdout);
+	print("\n", STDOUT_FILENO);
+	free_list(path);
+	exit(0);
+}
+
 /**
  * main - the main entry of the shell
  * @argc: the number of arguments
@@ -9,7 +19,8 @@
 int main(int argc __attribute__((unused)),
 char **argv __attribute__((unused)))
 {
-	list_t *path = NULL;
+
+	signal(SIGINT, ctrc_handler);
 
 	path = init_path(&path);
 	if (!isatty(STDIN_FILENO))
@@ -20,6 +31,7 @@ char **argv __attribute__((unused)))
 	{
 		interactive(path);
 	}
+	print("ui", STDOUT_FILENO);
 	free_list(path);
 	exit(0);
 }
