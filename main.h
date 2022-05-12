@@ -54,10 +54,15 @@ typedef struct func
 int _strlen(char *s);
 char *_strcat(char *dest, char *src);
 char *_strchr(char *s, char c);
+char *_memcpy(char *dest, char *src, unsigned int n);
 int _strcmp(char *s1, char *s2);
 char **_split(char *str, char *delim);
 int _atoi(char *s);
+
+/* BUILT-IN HELPERS */
 char *_getenv(const char *name);
+int _setenv(char *name, char *value, int overwrite);
+int _unsetenv(char *name);
 
 /* PATH HANDLER */
 list_t *add_node_end(list_t **head, char *str);
@@ -68,6 +73,8 @@ char *_search(list_t *path, char *str);
 /* BUILT-IN FUNCTIONS */
 void handle_exit(list_t *path, char **args);
 void env(list_t *path, char **args);
+void handle_setenv(list_t *path, char **args);
+void handle_unsetenv(list_t *path, char **args);
 void (*get_func(char *command))(list_t *path, char **args);
 
 
