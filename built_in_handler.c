@@ -121,3 +121,34 @@ void handle_unsetenv(list_t *path __attribute__((unused)), char **args)
 		return;
 	}
 }
+
+/**
+ * handle_cd - handle the cd command
+ * @path: list of directory in path
+ * @args: list f arguments
+ */
+void handle_cd(list_t *path __attribute__((unused)), char **args)
+{
+	int nb_arg = 0, cd_status;
+
+	while (args[nb_arg])
+		nb_arg++;
+
+	if (nb_arg > 2)
+	{
+		print(_getenv("_"), STDERR_FILENO);
+		print(": cd: can't take more than one argument\n", STDERR_FILENO);
+		return;
+	}
+
+	if (nb_arg == 1)
+		cd_status = _cd("");
+	else
+		cd_status = _cd(args[1]);
+
+	if (cd_status == 0)
+	{
+		print(_getenv("_"), STDERR_FILENO);
+		print(": cd: can't change directory\n", STDERR_FILENO);
+	}
+}

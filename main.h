@@ -59,24 +59,25 @@ int _strcmp(char *s1, char *s2);
 char **_split(char *str, char *delim);
 int _atoi(char *s);
 
-/* BUILT-IN HELPERS */
-char *_getenv(const char *name);
-int _setenv(char *name, char *value, int overwrite);
-int _unsetenv(char *name);
-
-/* PATH HANDLER */
+/* PATH HANDLERS */
 list_t *add_node_end(list_t **head, char *str);
 void free_list(list_t *head);
 list_t *init_path(list_t **head);
 char *_search(list_t *path, char *str);
 
-/* BUILT-IN FUNCTIONS */
+/* BUILT-IN HANDLERS */
+void (*get_func(char *command))(list_t *path, char **args);
 void handle_exit(list_t *path, char **args);
 void env(list_t *path, char **args);
 void handle_setenv(list_t *path, char **args);
 void handle_unsetenv(list_t *path, char **args);
-void (*get_func(char *command))(list_t *path, char **args);
+void handle_cd(list_t *path __attribute__((unused)), char **args);
 
+/* BUILT-IN FUNCTIONS */
+char *_getenv(const char *name);
+int _setenv(char *name, char *value, int overwrite);
+int _unsetenv(char *name);
+int _cd(char *cd);
 
 /* SHELL FUNCTIONS */
 ssize_t _getline(char **line, int mode);
