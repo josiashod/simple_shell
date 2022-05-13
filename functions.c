@@ -1,62 +1,167 @@
 #include "main.h"
 
 /**
- * string_to_array - splits a string and returns
- * an array of each word of the string.
- * @buffer: command string
- * @delim: separator
- * Return: array of each word of the string
+ * _getenv - gets an environment variable.
+ * @name: name of the var
+ *
+ * Return: pointer to the variable
  */
-
-char **string_to_array(char *buffer, char *delim)
+char *_getenv(const char *name)
 {
-	char **cmd = NULL;
-	char *token = NULL;
-	size_t i = 0;
+	int i, found;
+	char **env = environ;
 
-	token = strtok(buffer, delim);
-	while (token != NULL)
+	while (*env)
 	{
-		cmd = (char **)realloc(cmd, (sizeof(char *) * (i + 1)));
-		cmd[i] = token;
-		token = strtok(NULL, delim);
+		for (i = 0; *(*env + i) != '='; i++)
+		{
+			found = 1;
+			if (*(name + i) != *(*env + i))
+			{
+				found = 0;
+				break;
+			}
+		}
 		i++;
+		if (found)
+			return ((*env + i));
+
+		env++;
 	}
-	cmd = (char **)realloc(cmd, (sizeof(char *) * (i + 1)));
-	cmd[i] = NULL;
-	return (cmd);
+
+	return (NULL);
 }
 
 /**
- * handle_path - change path to complete path
- * @command: command to change complete path from
- * Return: complete path
+ * _setenv - set an environment variable.
+ * @name: name of the var
+ * @value: the new value
+ * @overwrite: perform changement
+ *
+ * Return: 0 on success, -1 on failure
  */
-
-char *handle_path(char *command)
+int _setenv(char *name, char *value, int overwrite)
 {
-	char *path = NULL;
-	char **directorys;
-	char *cwd = NULL;
-	struct stat st;
-	int i = 0;
-	char str = '/';
+	int i, status, j = 0;
+	char **cp_env = environ;
+	int len;
 
-	cwd = getcwd(cwd, 0);
-	path = getenv("PATH");
-	directorys = string_to_array(path, ":");
-	
-	while (directorys[i] != NULL)
+	while (*cp_env)
 	{
-		chdir(directorys[i]);
-		if (stat(command, &st) == 0)
+		for (i = 0; *(*cp_env + i) != '='; i++)
 		{
-			directorys[i] = _strncat(directorys[i], &str, 1);
-			command = _strcat(directorys[i], command);
-			break;
+			status = 1;
+			if (*(name + i) != *(*cp_env + i))
+			{
+				status = 0;
+				break;
+			}
 		}
 		i++;
+		if (status)
+		{
+			if (overwrite)
+				_memcpy((*cp_env + i), value, _strlen(value) + 1);
+			return (1);
+		}
+		cp_env++;
+		j++;
 	}
-	chdir(cwd);
-	return (command);
+
+	if (overwrite)
+	{
+		len = _strlen(name) + _strlen(value) + 1;
+		*cp_env = malloc(sizeof(char) * len);
+
+		if (!(*cp_env))
+			return (-1);
+
+		_strcat(_strcat(_strcat(*cp_env, name), "="), value);
+		cp_env++;
+		*cp_env = NULL;
+		return (0);
+	}
+	return (-1);
+}
+
+/**
+ * _unsetenv - set an environment variable.
+ * @name: name of the var
+ *
+ * Return: 0 on success, -1 on failure
+ */
+int _unsetenv(char *name)
+{
+	int i, status, j = 0;
+	char **cp_env = environ;
+
+	while (*cp_env)
+	{
+		for (i = 0; *(*cp_env + i) != '='; i++)
+		{
+			status = 1;
+			if (*(name + i) != *(*cp_env + i))
+			{
+				status = 0;
+				break;
+			}
+		}
+		if (status)
+		{
+			while (*cp_env)
+			{
+				*cp_env = *(cp_env + 1);
+				if (*(cp_env + 1))
+					cp_env++;
+			}
+		}
+		cp_env++;
+		j++;
+	}
+	return (0);
+}
+
+/**
+ * _cd - change the current directory
+ * @dir: the new directory
+ *
+ * Return: 1 on success, 0 on fail or -1 on error
+ */
+int _cd(char *dir)
+{
+	char *cwd = NULL, *home_dir = _getenv("HOME");
+
+	cwd = getcwd(cwd, 0);
+
+	if (_strlen(dir) == 0)
+		dir = home_dir;
+	if (_strcmp(dir, "-") == 0)
+	{
+		if (!_getenv("OLDPWD"))
+		{
+			print(_getenv("_"), STDERR_FILENO);
+			print(": cd: << OLDPWD >> non défini\n", STDERR_FILENO);
+			return (-1);
+		}
+
+		_memcpy(dir, _getenv("OLDPWD"), _strlen(_getenv("OLDPWD")) + 1);
+	}
+
+	if (chdir(dir) == 0)
+	{
+		if (_setenv("PWD", dir, 1) == -1)
+		{
+			chdir(cwd);
+			return (0);
+		}
+		if (_setenv("OLDPWD", cwd, 1) == -1)
+		{
+			chdir(cwd);
+			_setenv("PWD", cwd, 1);
+			return (0);
+		}
+		return (1);
+	}
+
+	return (0);
 }

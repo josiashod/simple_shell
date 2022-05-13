@@ -1,74 +1,157 @@
 #include "main.h"
-#include "errors.h"
 
 /**
- * main - Entry point
+ * _getline - this function handle
+ * line reading
+ * @line: the address of the line
+ * @mode: is interactive or non-interactive
+ * Description -
+ *				INTERACTIVE (1)
+ *				NON-INTERACTIVE (0)
  *
- * Return: returns EXIT_FAILURE OF EXIT_SUCCESS
- *
+ * Return: on success the number of
+ * caracteres read, on fails -1
  */
-
-int main(int argc  __attribute__((unused)), char *argv[])
+ssize_t _getline(char **line, int mode)
 {
-	char *buffer = NULL;
-	size_t bufsize = 0;
+	ssize_t ret;
+	size_t n = 0;
+
+	if (mode)
+		print("($) ", STDOUT_FILENO);
+
+	ret = getline(line, &n, stdin);
+
+	return (ret);
+}
+
+/**
+ * _execve - execute the command
+ * @path: list of command directory
+ * @args: the array of argument to execute
+ * @command_type: the command_type
+ */
+void _execve(list_t *path, char **args, int command_type)
+{
+	pid_t pid;
 	int status;
-	pid_t child_pid;
-	int e;
+
+	if (command_type == EXTERNAL_COMMAND || command_type == PATH_COMMAND)
+	{
+		pid = fork();
+		if (pid == 0)
+		{
+			execute_command(path, args, command_type);
+		}
+		else
+			waitpid(pid, &status, 0);
+	}
+	else if (command_type == INTERNAL_COMMAND)
+		execute_command(path, args, command_type);
+}
+
+/**
+ * execute_command - execute the command
+ * @path: list of command directory
+ * @args: the array of argument to execute
+ * @command_type: the command_type
+ */
+void execute_command(list_t *path, char **args, int command_type)
+{
+	void (*func)(list_t *path, char **args);
+
+	if (command_type == EXTERNAL_COMMAND)
+	{
+		if (execve(args[0], args, NULL) == -1)
+		{
+			perror(args[0]);
+			exit(2);
+		}
+	}
+
+	if (command_type == PATH_COMMAND)
+	{
+		if (execve(_search(path, args[0]), args, NULL) == -1)
+		{
+			perror(args[0]);
+			exit(2);
+		}
+	}
+	if (command_type == INTERNAL_COMMAND)
+	{
+		func = get_func(args[0]);
+		func(path, args);
+	}
+}
+
+/**
+ * non_interactive - the function handle the
+ * non-interactive mode off the shell
+ * @path: list of command directory
+ */
+void non_interactive(list_t *path)
+{
+	char *cmd, *line, delim = '\n', **lines, **args;
+	int i = 1, command_type;
+
+	while (_getline(&line, NON_INTERACTIVE_MODE) != -1)
+	{
+		/* remove new line */
+		cmd = strtok(line, &delim);
+		while (cmd)
+		{
+			lines = _split(cmd, ";");
+			args = _split(lines[0], " ");
+			command_type = get_command_type(path, args[0]);
+
+			if (command_type == INVALID_COMMAND)
+				print_error(args[0], i, NON_INTERACTIVE_MODE);
+
+			_execve(path, args, command_type);
+			free(args);
+			free(lines);
+			i++;
+			cmd = strtok(NULL, &delim);
+		}
+	}
+	free(line);
+}
+
+
+/**
+ * interactive - the function handle the
+ * interactive mode off the shell
+ * @path: list of command directory
+ */
+void interactive(list_t *path)
+{
+	char *line, delim = '\n', **args;
+	ssize_t read = 0;
+	int command_type;
 
 	while (1)
 	{
-		if (isatty(STDIN_FILENO))
-			printf("#cisfun$ ");
-		if (getline(&buffer, &bufsize, stdin) < 0)
+		read = _getline(&line, INTERACTIVE_MODE);
+		if (read > 1)
+		{
+			/* remove new line */
+			strtok(line, &delim);
+			args = _split(line, " ");
+
+			command_type = get_command_type(path, args[0]);
+
+			if (command_type == INVALID_COMMAND)
+				print_error(args[0], 0, INTERACTIVE_MODE);
+
+			_execve(path, args, command_type);
+			free(args);
+		}
+
+		if (read == -1)
+		{
+			print("\n", STDOUT_FILENO);
 			break;
-		if (buffer == NULL)
-			exit(0);
-
-		argv = string_to_array(buffer, " \n");
-		if (argv[0] == NULL)
-		{	free(argv);
-			continue;
 		}
-		if (_strcmp(argv[0], "env") == 0)
-		{
-			while (environ[e])
-				printf("%s\n", environ[e++]);
-			free(argv);
-			continue;
-		}
-		if (_strcmp(argv[0], "exit") == 0)
-		{
-			free(argv);
-			free(buffer);
-			exit(0);
-		}
-
-		child_pid = fork();
-		if (child_pid == -1)
-		{
-			write(STDOUT_FILENO, FORK_FAILED, strlen(FORK_FAILED));
-		}
-		if (child_pid == 0)
-		{
-			if (_strchr(argv[0], '/') == NULL)
-				argv[0] = handle_path(argv[0]);
-			if (execve(argv[0], argv, NULL))
-			{
-				perror(INVALID_COMMAND);
-				exit(EXIT_FAILURE);
-				break;
-			}
-			
-		}
-		else if (child_pid > 0)
-		{
-			wait(&status);
-		}
-		free(argv);
 	}
-
-	printf("\n");
-	free(buffer);
-	return (0);
+	free(line);
 }
