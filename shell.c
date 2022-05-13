@@ -148,7 +148,10 @@ void interactive(list_t *path)
 		}
 
 		if (read == -1)
+		{
+			print("\n", STDOUT_FILENO);
 			break;
+		}
 	}
 	free(line);
 }
