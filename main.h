@@ -58,6 +58,10 @@ char *_memcpy(char *dest, char *src, unsigned int n);
 int _strcmp(char *s1, char *s2);
 char **_split(char *str, char *delim);
 int _atoi(char *s);
+char * _mystrtok_r(char *str, char *delim, char **save_ptr);
+char * _strtok(char *str, char *delim);
+unsigned int _strspn(char *s, char *accept);
+size_t _strcspn(char *s1, char *s2);
 
 /* PATH HANDLERS */
 list_t *add_node_end(list_t **head, char *str);

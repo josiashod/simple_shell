@@ -45,12 +45,12 @@ char **_split(char *str, char *delim)
 	if (!split)
 		return (NULL);
 
-	token = strtok(str, delim);
+	token = _strtok(str, delim);
 	while (token)
 	{
 		split[i] = token;
 		i++;
-		token = strtok(NULL, delim);
+		token = _strtok(NULL, delim);
 	}
 	split[i] = NULL;
 	return (split);
@@ -72,4 +72,61 @@ char *_memcpy(char *dest, char *src, unsigned int n)
 		dest[i] = src[i];
 
 	return (dest);
+}
+
+/**
+ * _strtok - breaks a string into a sequence
+ * of zero or more nonempty tokens
+ * @str: the string to be parsed
+ * @delim: specifies a set of bytes that delimit the
+ * tokens in the parsed string
+ * Return: return a pointer to the next token,
+ * or NULL if there are no more tokens
+ */
+
+char *_strtok(char *str, char *delim)
+{
+	static char *olds;
+	return (_mystrtok_r(str, delim, &olds));
+}
+
+/**
+ * _mystrtok_r - parse str into tokens separated 
+ * by characters in delim
+ * @str: the string to be parsed
+ * @delim: specifies a set of bytes that delimit the
+ * tokens in the parsed string
+ * @buffer: pointer to pointer
+ * Return: NULL or token
+ */
+
+char *_mystrtok_r(char *str, char *delim, char **buffer)
+{
+	char *end;
+
+	if (str == NULL)
+		str = *buffer;
+	if (*str == '\0')
+	{
+		*buffer = str;
+		return (NULL);
+	}
+
+	str += _strspn(str, delim);
+	if (*str == '\0')
+	{
+		*buffer = str;
+		return (NULL);
+	}
+
+	end = str + _strcspn(str, delim);
+	if (*end == '\0')
+	{
+		*buffer = end;
+		return (str);
+	}
+
+	*end = '\0';
+	*buffer = end + 1;
+	return (str);
 }
