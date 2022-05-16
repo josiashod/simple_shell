@@ -87,11 +87,12 @@ char *_memcpy(char *dest, char *src, unsigned int n)
 char *_strtok(char *str, char *delim)
 {
 	static char *olds;
+
 	return (_mystrtok_r(str, delim, &olds));
 }
 
 /**
- * _mystrtok_r - parse str into tokens separated 
+ * _mystrtok_r - parse str into tokens separated
  * by characters in delim
  * @str: the string to be parsed
  * @delim: specifies a set of bytes that delimit the

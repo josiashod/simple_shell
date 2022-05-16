@@ -15,7 +15,8 @@
 int get_command_type(list_t *path, char *command)
 {
 	int i;
-	char *internal_commands[] = {"env", "exit", "setenv", "unsetenv", "cd", NULL}, *dir;
+	char *internal_commands[] = {"env", "exit", "setenv", "unsetenv",
+		"cd", NULL}, *dir;
 
 	if (_strchr(command, '/'))
 		return (EXTERNAL_COMMAND);

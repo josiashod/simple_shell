@@ -34,12 +34,9 @@ size_t _strcspn(char *s1, char *s2)
 	while (*s1)
 	{
 		if (_strchr(s2, *s1))
-			return len;
-		else
-		{
-			s1++;
-			len++;
-		}
+			return (len);
+		s1++;
+		len++;
 	}
 	return (len);
 }
