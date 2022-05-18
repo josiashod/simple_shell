@@ -13,6 +13,7 @@ char **argv __attribute__((unused)))
 
 	path = init_path(&path);
 
+	signal(SIGINT, SIG_IGN);
 	if (!isatty(STDIN_FILENO))
 	{
 		non_interactive(path);
