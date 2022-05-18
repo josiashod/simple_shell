@@ -1,7 +1,7 @@
 0x16. C - Simple Shell
 ======================
 
--   By Julien Barbier
+-  By Julien Barbier
 
 Concepts
 --------
