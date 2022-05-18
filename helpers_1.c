@@ -83,12 +83,14 @@ char *_memcpy(char *dest, char *src, unsigned int n)
  * Return: return a pointer to the next token,
  * or NULL if there are no more tokens
  */
-/*char *_strtok(char *str, char *delim)
+
+char *_strtok(char *str, char *delim)
 {
 	static char *olds;
 
 	return (_mystrtok_r(str, delim, &olds));
-}*/
+}
+
 /**
  * _mystrtok_r - parse str into tokens separated
  * by characters in delim
@@ -98,7 +100,8 @@ char *_memcpy(char *dest, char *src, unsigned int n)
  * @buffer: pointer to pointer
  * Return: NULL or token
  */
-/*char *_mystrtok_r(char *str, char *delim, char **buffer)
+
+char *_mystrtok_r(char *str, char *delim, char **buffer)
 {
 	char *end;
 
@@ -127,4 +130,4 @@ char *_memcpy(char *dest, char *src, unsigned int n)
 	*end = '\0';
 	*buffer = end + 1;
 	return (str);
-}*/
+}

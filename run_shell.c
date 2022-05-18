@@ -21,5 +21,5 @@ char **argv __attribute__((unused)))
 		interactive(path);
 	}
 	free_list(path);
-	exit(0);
+	return (0);
 }
