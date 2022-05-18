@@ -1,51 +1,115 @@
 #include "main.h"
 
-/**
- * print_number - print number
- * @n: number to print
- * @stream: stream to print out
- */
-void print_number(int n, int stream)
-{
-	char c = (n % 10) + '0';
-
-	if (n > 9)
-		print_number(n / 10, stream);
-	write(stream, &c, 1);
-}
+int num_len(int num);
+char *_itoa(int num);
+int create_error(char **args, int err);
 
 /**
- * print_error - this function print error
- * @command: the command is entered by the user
- * @line: the line where the command is not good
- * @mode: is interactive or non-interactive
- * Description -
- *				INTERACTIVE (1)
- *				NON-INTERACTIVE (0)
+ * num_len - Counts the digit length of a number.
+ * @num: The number to measure.
+ *
+ * Return: The digit length.
  */
-void print_error(char *command, int line __attribute__((unused)),
-int mode)
+int num_len(int num)
 {
-	print(_getenv("_"), STDERR_FILENO);
-	print(": ", STDERR_FILENO);
-	if (!mode)
+	unsigned int num1;
+	int len = 1;
+
+	if (num < 0)
 	{
-		print_number(line, STDERR_FILENO);
-		print(": ", STDERR_FILENO);
+		len++;
+		num1 = num * -1;
 	}
-	print(command, STDERR_FILENO);
-	print(": not found\n", STDERR_FILENO);
+	else
+	{
+		num1 = num;
+	}
+	while (num1 > 9)
+	{
+		len++;
+		num1 /= 10;
+	}
+
+	return (len);
 }
 
 /**
- * print - print message
- * @str: string to print
- * @stream: stream to print out
+ * _itoa - Converts an integer to a string.
+ * @num: The integer.
+ *
+ * Return: The converted string.
  */
-void print(char *str, int stream)
+char *_itoa(int num)
 {
-	int i = 0;
+	char *buffer;
+	int len = num_len(num);
+	unsigned int num1;
 
-	for (; str[i]; i++)
-		write(stream, &str[i], 1);
+	buffer = malloc(sizeof(char) * (len + 1));
+	if (!buffer)
+		return (NULL);
+
+	buffer[len] = '\0';
+
+	if (num < 0)
+	{
+		num1 = num * -1;
+		buffer[0] = '-';
+	}
+	else
+	{
+		num1 = num;
+	}
+
+	len--;
+	do {
+		buffer[len] = (num1 % 10) + '0';
+		num1 /= 10;
+		len--;
+	} while (num1 > 0);
+
+	return (buffer);
+}
+
+
+/**
+ * create_error - Writes a custom error message to stderr.
+ * @args: An array of arguments.
+ * @err: The error value.
+ *
+ * Return: The error value.
+ */
+int create_error(char **args, int err)
+{
+	char *error;
+
+	switch (err)
+	{
+	case -1:
+		error = error_env(args);
+		break;
+	case 1:
+		error = error_1(args);
+		break;
+	case 2:
+		if (*(args[0]) == 'e')
+			error = error_2_exit(++args);
+		else if (args[0][0] == ';' || args[0][0] == '&' || args[0][0] == '|')
+			error = error_2_syntax(args);
+		else
+			error = error_2_cd(args);
+		break;
+	case 126:
+		error = error_126(args);
+		break;
+	case 127:
+		error = error_127(args);
+		break;
+	}
+	write(STDERR_FILENO, error, _strlen(error));
+
+	if (error)
+		free(error);
+	return (err);
+
 }

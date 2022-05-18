@@ -1,122 +1,155 @@
 #include "main.h"
 
+void free_args(char **args, char **front);
+char *get_pid(void);
+char *get_env_value(char *beginning, int len);
+void variable_replacement(char **args, int *exe_ret);
+
 /**
- * _strlen - returns the length of a string.
- * @s: string whose length should be return
- *
- * Return: (int) the length of the string.
+ * free_args - Frees up memory taken by args.
+ * @args: A null-terminated double pointer containing commands/arguments.
+ * @front: A double pointer to the beginning of args.
  */
-int _strlen(char *s)
+void free_args(char **args, char **front)
 {
-	int i = 0;
+	size_t i;
 
-	while (s[i] != '\0')
-		i++;
+	for (i = 0; args[i] || args[i + 1]; i++)
+		free(args[i]);
 
-	return (i);
+	free(front);
 }
 
 /**
- * _strcat - concatenates two strings.
- * @dest: destination.
- * @src: source
+ * get_pid - Gets the current process ID.
+ * Description: Opens the stat file, a space-delimited file containing
+ *              information about the current process. The PID is the
+ *              first word in the file. The function reads the PID into
+ *              a buffer and replace the space at the end with a \0 byte.
  *
- * Return: pointer to the resulting string dest.
+ * Return: The current process ID or NULL on failure.
  */
-char *_strcat(char *dest, char *src)
+char *get_pid(void)
 {
-	int len = _strlen(dest);
+	size_t i = 0;
+	char *buffer;
+	ssize_t file;
 
-	do {
-		dest[len] = *src;
-		len++;
-	} while (*src++);
-
-	dest[len] = '\0';
-
-	return (dest);
-}
-
-/**
- * _strchr - locates a character in a string.
- * @s: source
- * @c: char to find
- *
- * Return: a pointer to the first occurrence of
- * the character c in the string s, or NULL if
- * the character is not found.
- */
-char *_strchr(char *s, char c)
-{
-	int i = 0;
-
-	while (s[i] != '\0' && s[i] != c)
-		i++;
-
-	if (s[i] == c)
-		return (s + i);
-	return (NULL);
-}
-
-/**
- * _strcmp - compares two strings.
- * @s1: first string.
- * @s2: second string.
- *
- * Return: an integer less than,
- * equal to, or greater than zero
- * if s1 is found
- */
-int _strcmp(char *s1, char *s2)
-{
-	int comp = 0, i = 0;
-
-	while (1)
+	file = open("/proc/self/stat", O_RDONLY);
+	if (file == -1)
 	{
-		if (s1[i] == '\0' && s2[i] == '\0')
-			break;
-		else if (s1[i] == '\0')
-		{
-			comp = s2[i];
-			break;
-		}
-		else if (s2[i] == '\0')
-		{
-			comp = s1[i];
-			break;
-		}
-		else if (s1[i] != s2[i])
-		{
-			comp = s1[i] - s2[i];
-			break;
-		}
-		else
-			i++;
+		perror("Cant read file");
+		return (NULL);
+	}
+	buffer = malloc(120);
+	if (!buffer)
+	{
+		close(file);
+		return (NULL);
+	}
+	read(file, buffer, 120);
+	while (buffer[i] != ' ')
+		i++;
+	buffer[i] = '\0';
 
+	close(file);
+	return (buffer);
+}
+
+/**
+ * get_env_value - Gets the value corresponding to an environmental variable.
+ * @beginning: The environmental variable to search for.
+ * @len: The length of the environmental variable to search for.
+ *
+ * Return: If the variable is not found - an empty string.
+ *         Otherwise - the value of the environmental variable.
+ *
+ * Description: Variables are stored in the format VARIABLE=VALUE.
+ */
+char *get_env_value(char *beginning, int len)
+{
+	char **var_addr;
+	char *replacement = NULL, *temp, *var;
+
+	var = malloc(len + 1);
+	if (!var)
+		return (NULL);
+	var[0] = '\0';
+	_strncat(var, beginning, len);
+
+	var_addr = _getenv(var);
+	free(var);
+	if (var_addr)
+	{
+		temp = *var_addr;
+		while (*temp != '=')
+			temp++;
+		temp++;
+		replacement = malloc(_strlen(temp) + 1);
+		if (replacement)
+			_strcpy(replacement, temp);
 	}
 
-	return (comp);
+	return (replacement);
 }
 
 /**
- * _atoi - convert a string to an integer.
- * @s: the string to convert.
+ * variable_replacement - Handles variable replacement.
+ * @line: A double pointer containing the command and arguments.
+ * @exe_ret: A pointer to the return value of the last executed command.
  *
- * Return: the converted int.
+ * Description: Replaces $$ with the current PID, $? with the return value
+ *              of the last executed program, and envrionmental variables
+ *              preceded by $ with their corresponding value.
  */
-int _atoi(char *s)
+void variable_replacement(char **line, int *exe_ret)
 {
-	unsigned int num = 0;
-	int signe = 1;
+	int j, k = 0, len;
+	char *replacement = NULL, *old_line = NULL, *new_line;
 
-	do {
-		if (*s == '-')
-			signe *= -1;
-		else if (*s >= '0' && *s <= '9')
-			num = num * 10 + (*s - '0');
-		else if (num > 0)
-			break;
-	} while (*s++);
-
-	return (num * signe);
+	old_line = *line;
+	for (j = 0; old_line[j]; j++)
+	{
+		if (old_line[j] == '$' && old_line[j + 1] &&
+				old_line[j + 1] != ' ')
+		{
+			if (old_line[j + 1] == '$')
+			{
+				replacement = get_pid();
+				k = j + 2;
+			}
+			else if (old_line[j + 1] == '?')
+			{
+				replacement = _itoa(*exe_ret);
+				k = j + 2;
+			}
+			else if (old_line[j + 1])
+			{
+				/* extract the variable name to search for */
+				for (k = j + 1; old_line[k] &&
+						old_line[k] != '$' &&
+						old_line[k] != ' '; k++)
+					;
+				len = k - (j + 1);
+				replacement = get_env_value(&old_line[j + 1], len);
+			}
+			new_line = malloc(j + _strlen(replacement)
+					  + _strlen(&old_line[k]) + 1);
+			if (!line)
+				return;
+			new_line[0] = '\0';
+			_strncat(new_line, old_line, j);
+			if (replacement)
+			{
+				_strcat(new_line, replacement);
+				free(replacement);
+				replacement = NULL;
+			}
+			_strcat(new_line, &old_line[k]);
+			free(old_line);
+			*line = new_line;
+			old_line = new_line;
+			j = -1;
+		}
+	}
 }
