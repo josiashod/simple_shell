@@ -23,6 +23,7 @@ extern char **environ;
 #define NON_INTERACTIVE_MODE 0
 
 
+
 /**
  * struct list_s - singly linked list
  * @str: string - (malloc'ed string)
@@ -58,8 +59,8 @@ char *_memcpy(char *dest, char *src, unsigned int n);
 int _strcmp(char *s1, char *s2);
 char **_split(char *str, char *delim);
 int _atoi(char *s);
-char *_mystrtok_r(char *str, char *delim, char **save_ptr);
-char *_strtok(char *str, char *delim);
+/*char *_mystrtok_r(char *str, char *delim, char **save_ptr);
+char *_strtok(char *str, char *delim);*/
 unsigned int _strspn(char *s, char *accept);
 size_t _strcspn(char *s1, char *s2);
 

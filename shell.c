@@ -97,7 +97,7 @@ void non_interactive(list_t *path)
 	while (_getline(&line, NON_INTERACTIVE_MODE) != -1)
 	{
 		/* remove new line */
-		cmd = _strtok(line, &delim);
+		cmd = strtok(line, &delim);
 		while (cmd)
 		{
 			lines = _split(cmd, ";");
@@ -111,7 +111,7 @@ void non_interactive(list_t *path)
 			free(args);
 			free(lines);
 			i++;
-			cmd = _strtok(NULL, &delim);
+			cmd = strtok(NULL, &delim);
 		}
 	}
 	free(line);
@@ -136,7 +136,7 @@ void interactive(list_t *path)
 		if (read > 1)
 		{
 			/* remove new line */
-			_strtok(line, &delim);
+			strtok(line, &delim);
 			args = _split(line, " ");
 
 			command_type = get_command_type(path, args[0]);

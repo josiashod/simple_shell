@@ -45,12 +45,12 @@ char **_split(char *str, char *delim)
 	if (!split)
 		return (NULL);
 
-	token = _strtok(str, delim);
+	token = strtok(str, delim);
 	while (token)
 	{
 		split[i] = token;
 		i++;
-		token = _strtok(NULL, delim);
+		token = strtok(NULL, delim);
 	}
 	split[i] = NULL;
 	return (split);
@@ -83,14 +83,12 @@ char *_memcpy(char *dest, char *src, unsigned int n)
  * Return: return a pointer to the next token,
  * or NULL if there are no more tokens
  */
-
-char *_strtok(char *str, char *delim)
+/*char *_strtok(char *str, char *delim)
 {
 	static char *olds;
 
 	return (_mystrtok_r(str, delim, &olds));
-}
-
+}*/
 /**
  * _mystrtok_r - parse str into tokens separated
  * by characters in delim
@@ -100,8 +98,7 @@ char *_strtok(char *str, char *delim)
  * @buffer: pointer to pointer
  * Return: NULL or token
  */
-
-char *_mystrtok_r(char *str, char *delim, char **buffer)
+/*char *_mystrtok_r(char *str, char *delim, char **buffer)
 {
 	char *end;
 
@@ -130,4 +127,4 @@ char *_mystrtok_r(char *str, char *delim, char **buffer)
 	*end = '\0';
 	*buffer = end + 1;
 	return (str);
-}
+}*/
